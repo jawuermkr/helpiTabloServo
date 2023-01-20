@@ -38,3 +38,49 @@ exports.delete = (req, res) => {
     )
   })
 }
+
+exports.consulta = (req, res) => {
+  req.getConnection((err, conn) =>{
+    if(err) return res.send(err);
+    console.log(req.params.tabla);
+    console.log(req.params.campo);
+    console.log(req.params.value);
+    conn.query(
+      "SELECT * FROM " + req.params.tabla + " WHERE " + req.params.campo + " = ?", [req.params.value],
+      (err, rows) =>{
+        console.log(rows)
+        console.log(
+         rows.length !== 0
+         ? "SELECT FROM " + req.params.tabla + " WHERE " + req.params.campo + " = ? "
+         : req.params.tabla + " Error al consultar"
+        )
+        res.json(
+         rows.length == 0
+         ? {err: "No se ha podido realizar la consulta."}
+         : {msg: "Busqueda exitosa", result: rows}
+        )
+      }
+    )
+  })
+}
+
+exports.actualiza = (req, res) => {
+  req.getConnection((err, conn) =>{
+    if(err) return res.send(err);
+    conn.query(
+      "UPDATE " + req.params.tabla + " SET ? WHERE " + req.params.campo + " = ? ", [req.body, req.params.value],
+      (err, rows) => {
+        console.log(
+          err
+          ? "Err UPDATE " + req.params.tabla + " SET ? WHERE " + req.params.cedula + " = ?" + err
+          : req.params.tabla + "Datos actualizados."
+        );
+        res.json(
+          err
+          ? {err: "Ha ocurrido un error al actualizad los datos."}
+          : {msg: "Datos actualizados con éxito."}
+        )
+      }  
+    )
+  })
+}
